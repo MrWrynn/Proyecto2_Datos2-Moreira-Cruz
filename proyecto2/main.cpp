@@ -7,7 +7,7 @@ class PaintWidget : public QWidget {
     // that the user will draw [on].
     QPixmap m_pixmap;
     QPoint m_lastPos;
-    QColor color = Qt::blue;
+    QColor color = Qt::yellow;
     // Override the paintEvent(QPaintEvent *) [...]
     void paintEvent(QPaintEvent *) override {
         QPainter painter{this};
@@ -27,9 +27,7 @@ class PaintWidget : public QWidget {
     // Override the mousePressEvent(QMouseEvent *) [...]
     void mousePressEvent(QMouseEvent * ev) override {
         m_lastPos = ev->pos();
-        QString text;
-        text=QString("%1X%2").arg(ev->pos().x()).arg(ev->pos().y());
-        QTextStream(stdout) << text <<"\n";
+
         draw(ev->pos());
     }
     // Override the mouseMoveEvent(QMouseEvent *) [...]
@@ -43,6 +41,12 @@ class PaintWidget : public QWidget {
         painter.setPen({color, 2.0});
         painter.drawLine(m_lastPos, pos);
         //QTextStream(stdout) << m_lastPos;
+        QString text;
+        QString prueba;
+        text=QString("%1X%2").arg(m_lastPos.x()).arg(m_lastPos.y());
+        prueba=QString(color.name());
+        QTextStream(stdout) << text <<"\n";
+        QTextStream(stdout) << prueba <<"\n";
 
         m_lastPos = pos;
         update();
@@ -54,8 +58,6 @@ public:
 int main(int argc, char ** argv) {
     QApplication app{argc, argv};
     // Create an object of your subclass and call show()
-
-
     PaintWidget ui;
     ui.show();
     return app.exec();
