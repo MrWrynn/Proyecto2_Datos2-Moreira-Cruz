@@ -39,11 +39,22 @@ class PaintWidget : public QWidget {
     }
     void keyPressEvent(QKeyEvent * ev) override {
         if(ev->key()==Qt::Key_S){
-            bitmap.write("/home/jose/proyecto2/copia.bmp");
-        }
-        else if(ev->key()==Qt::Key_R){
             bitmap.rotate_rigth();
             bitmap.write("/home/jose/proyecto2/copia.bmp");
+            bitmap.rotate_left();
+        }
+
+        else if(ev->key()==Qt::Key_R){
+            bitmap.rotate_rigth();
+            cargarimagen();
+        }
+        else if(ev->key()==Qt::Key_C){
+            bitmap.white();
+            cargarimagen();
+            bitmap.read("/home/jose/proyecto2/snail.bmp");
+            bitmap.rotate_left();
+            cargarimagen();
+
         }
 
     }
@@ -52,27 +63,32 @@ class PaintWidget : public QWidget {
         draw(ev->pos());
 
     }
+    void cargarimagen(){
+        QPainter painter{&m_pixmap};
+        for(int i=0;i<bitmap.getWidth();i++){
+            for(int j=0;j<bitmap.getHeight();j++){
+                RGBTRIPLE pixel=bitmap.getPixel(i,j);
+                painter.fillRect(i,j,1,1,QColor((int) pixel.rgbtRed,(int) pixel.rgbtGreen,(int) pixel.rgbtBlue));
+            }
+        }
+    }
 
     void draw(const QPoint & pos) {
-        QPainter painter{&m_pixmap};
+        //QPainter painter{&m_pixmap};
 
-        painter.setRenderHint(QPainter::Antialiasing);
-        pen.setWidth(0);
-        pen.setStyle(Qt::SolidLine);
-        painter.setPen(pen);
-        painter.drawLine(m_lastPos, pos);
-        bitmap.linea(m_lastPos.x(),m_lastPos.y(),pos.x(),pos.y());
-        bitmap.SetPixel(m_lastPos.x(),m_lastPos.y(),(BYTE) 0, (BYTE) 0, (BYTE) 255);
-        bitmap.SetPixel(pos.x(),pos.y(),(BYTE) 0, (BYTE) 0, (BYTE) 255);
-        //painter.drawPoint(m_lastPos);
-        //painter.fillRect(pos.x(),pos.y(),1,1,Qt::blue);
-        //painter.drawLine(0,100,100,100); //Dibujar linea
-        //painter.drawEllipse(300,300,100,100); //Dibujar circulo
+        //painter.setRenderHint(QPainter::Antialiasing);
+        //pen.setWidth(0);
+        //pen.setStyle(Qt::SolidLine);
+        //painter.setPen(pen);
+        //painter.drawLine(m_lastPos, pos);
+        RGBTRIPLE rojo={(BYTE) 255,(BYTE) 0,(BYTE) 0 };
+        bitmap.linea(m_lastPos.x(),m_lastPos.y(),pos.x(),pos.y(),rojo);
+        bitmap.SetPixel(m_lastPos.x(),m_lastPos.y(),(BYTE) 0, (BYTE) 0, (BYTE) 0);
+        bitmap.SetPixel(pos.x(),pos.y(),(BYTE) 0, (BYTE) 0, (BYTE) 0);
+        cargarimagen();
         QString text;
         text=QString("%1X%2").arg(m_lastPos.x()).arg(m_lastPos.y());
         text=QString("%1X%2").arg(pos.x()).arg(pos.y());
-        //QTextStream(stdout) << text <<"\n";
-        //QTextStream(stdout) << "X :"<< QCursor::pos().x() << " Y :"<< QCursor::pos().y() <<"\n";
 
         m_lastPos = pos;
         update();
@@ -80,8 +96,9 @@ class PaintWidget : public QWidget {
 public:
     using QWidget::QWidget;
     void init(){
-        bitmap.generate(200,200);
+        bitmap.generate(600,600);
         bitmap.white();
+
 
     }
 
@@ -92,7 +109,7 @@ int main(int argc, char ** argv) {
     QApplication app{argc, argv};
     PaintWidget ui;
     ui.init();
-    ui.setFixedSize(200,200);
+    ui.setFixedSize(600,600);
     ui.show();
     return app.exec();
 }
