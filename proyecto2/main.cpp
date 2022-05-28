@@ -147,6 +147,15 @@ class PaintWidget : public QWidget {
             bitmap.write("/home/jose/proyecto2/copia.bmp");
             bitmap.rotate_left();
         }
+        else if(ev->key()==Qt::Key_R){
+            bitmap.rotate_right;
+            bitmap.write("/home/jose/proyecto2/copia.bmp");
+            
+        }
+        else if(ev->key()==Qt::Key_L){
+            bitmap.rotate_left();
+            bitmap.write("/home/jose/proyecto2/copia.bmp");
+        }
         else if(ev->key()==Qt::Key_Up){
             bitmap.AumentarGrosor();
         }
