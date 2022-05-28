@@ -10,6 +10,7 @@
 #include "iostream"
 #include "stdlib.h"
 #include "image.hpp"
+#include "queue"
 
 using namespace std;
 
@@ -45,9 +46,24 @@ bool image::inBounds(int x,int y){
     return x<width && y<heigth;
 }
 
+void image::setGrosor(int _grosor){
+    grosor=_grosor;
+}
+
 void image::SetPixel(int x, int y, BYTE red,BYTE green, BYTE blue){
     if(inBounds(x,y) && x>0 && y>0){
-        data[x][y]={blue,green,red};
+        if(grosor==1){
+            data[x][y]={red,green,blue};//{color.rgbtBlue,color.rgbtGreen,color.rgbtRed};
+        }
+        else{
+            for (int i = 0; i < grosor; ++i) {
+                for (int j = 0; j < grosor ; ++j) {
+                    if(inBounds(x+i,y+j)){
+                        data[x+i][y+j]={red,green,blue};//{color.rgbtBlue,color.rgbtGreen,color.rgbtRed};
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -178,38 +194,70 @@ void image::rotate_left(){
 };
 
 void image::dark(){
+    RGBTRIPLE** newData=new RGBTRIPLE*[heigth];
+    for (int i = 0; i < heigth; ++i) {
+        newData[i]=new RGBTRIPLE[width];
+    }
     for (int i = 0; i < heigth; ++i) {
         for (int j = 0; j < width; ++j) {
             int blue=(int) data[i][j].rgbtBlue;
             int green=(int) data[i][j].rgbtGreen;
             int red=(int) data[i][j].rgbtRed;
-            SetPixel(i,j,(BYTE) (red/3),(BYTE) (green/3), (BYTE) (blue/3));
+            newData[i][j]={(BYTE) (red/3),(BYTE) (green/3),(BYTE) (blue/3)};
         }
     }
+    data=newData;
 }
 
 void image::grey(){
+    RGBTRIPLE** newData=new RGBTRIPLE*[heigth];
+    for (int i = 0; i < heigth; ++i) {
+        newData[i]=new RGBTRIPLE[width];
+    }
     for (int i = 0; i < heigth; ++i) {
         for (int j = 0; j < width; ++j) {
             int blue=(int) data[i][j].rgbtBlue;
             int green=(int) data[i][j].rgbtGreen;
             int red=(int) data[i][j].rgbtRed;
             int greey=(blue+green+red)/3;
-            SetPixel(i,j,(BYTE) greey,(BYTE) greey, (BYTE) greey);
+            newData[i][j]={(BYTE) greey,(BYTE) greey,(BYTE) greey};
+
         }
     }
+    data=newData;
 
 }
 
 void image::negative(){
+    RGBTRIPLE** newData=new RGBTRIPLE*[heigth];
+    for (int i = 0; i < heigth; ++i) {
+        newData[i]=new RGBTRIPLE[width];
+    }
     for (int i = 0; i < heigth; ++i) {
         for (int j = 0; j < width; ++j) {
             int blue=(int) data[i][j].rgbtBlue;
             int green=(int) data[i][j].rgbtGreen;
             int red=(int) data[i][j].rgbtRed;
-            SetPixel(i,j,(BYTE) red-255,(BYTE) green-255, (BYTE) blue-255);
+            newData[i][j]={(BYTE) (red-255),(BYTE) (green-255), (BYTE) (blue-255)};
         }
     }
+    data=newData;
+}
+
+void image::mix(){
+    RGBTRIPLE** newData=new RGBTRIPLE*[heigth];
+    for (int i = 0; i < heigth; ++i) {
+        newData[i]=new RGBTRIPLE[width];
+    }
+    for (int i = 0; i < heigth; ++i) {
+        for (int j = 0; j < width; ++j) {
+            int blue=(int) data[i][j].rgbtBlue;
+            int green=(int) data[i][j].rgbtGreen;
+            int red=(int) data[i][j].rgbtRed;
+            newData[i][j]={(BYTE) blue,(BYTE) red ,(BYTE) green};
+        }
+    }
+    data=newData;
 }
 
 RGBTRIPLE image::getPixel(int x, int y){
@@ -218,35 +266,46 @@ RGBTRIPLE image::getPixel(int x, int y){
 
 void image::linea(float x1, float y1, float x2, float y2) {
     if(x1==x2){
-        for(int j=y1;j<y2;j++){
+        for(int j=y1;j<=y2;j++){
             int i=x1;
-            SetPixel(i,j,(BYTE) 255, (BYTE) 0, (BYTE) 0);
+            SetPixel(i,j,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
         }
 
-        for(int j=y2;j<y1;j++){
+        for(int j=y2;j<=y1;j++){
             int i=x1;
-            SetPixel(i,j,(BYTE) 255, (BYTE) 0, (BYTE) 0);
+            SetPixel(i,j,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
         }
     }
     else{
         float m=(y1-y2)/(x1-x2);
         float b=y1-x1*m;
-        for (int i = x1; i < x2 ; ++i) {
+
+        for (int i = x1; i <= x2 ; ++i) {
             float j=i*m+b;
             int jentero=(int) j;
             if(j-jentero!=0){
-                SetPixel(i,jentero+1,(BYTE) 255, (BYTE) 0, (BYTE) 0);
-                    }
-            SetPixel(i,jentero,(BYTE) 255, (BYTE) 0, (BYTE) 0);
+                SetPixel(i,jentero+1,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
+            }
+            SetPixel(i,jentero,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
         }
 
-        for (int i = x2; i < x1 ; ++i) {
+        for (int i = x2; i <= x1 ; ++i) {
             float j=i*m+b;
-                    int jentero=(int) j;
-                    if(j-jentero!=0){
-                        SetPixel(i,jentero+1,(BYTE) 255, (BYTE) 0, (BYTE) 0);
-                    }
-                    SetPixel(i,jentero,(BYTE) 255, (BYTE) 0, (BYTE) 0);
+            int jentero=(int) j;
+            if(j-jentero!=0){
+                SetPixel(i,jentero+1,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
+            }
+            SetPixel(i,jentero,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
+        }
+
+        for (int j = y1; j < y2 ; ++j) {
+            int i=j/m - b/m;
+            SetPixel(i,j,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
+        }
+
+        for (int j = y2; j < y1 ; ++j) {
+            int i=j/m - b/m;
+            SetPixel(i,j,color.rgbtRed, color.rgbtGreen, color.rgbtBlue);
         }
     }
 }
@@ -259,6 +318,150 @@ int image::getWidth(){
     return width;
 }
 
+void image::BFSpaint(int si, int sj) {
+    int row[] = {  -1,  0, 0,  1  };
+    int col[] = {  0,  -1, 1,  0 };
+    bool vis[width][heigth];
+    int temp=grosor;
+    RGBTRIPLE colorInicial=data[si][sj];
+    grosor=1;
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < heigth; ++j) {
+            vis[i][j]= false;
+        }
+    }
+    queue<pair<int, int> > q;
+    q.push(make_pair(si, sj));
+    vis[si][sj] = true;
+
+    if(mode=="pintar"){
+        SetPixel(si,sj,color.rgbtRed,color.rgbtGreen,color.rgbtBlue);
+    }else{
+        SetPixel(si,sj,data[si][sj].rgbtRed/6,data[si][sj].rgbtGreen/6,data[si][sj].rgbtBlue/6);
+    }
+
+    while (!q.empty()) {
+        int i = q.front().first;
+        int j = q.front().second;
+        q.pop();
+
+        // Go through all 8 adjacent
+        for (int k = 0; k < 4; k++) {
+            if (i+row[k]>=0 && j+col[k]>=0 && i+row[k]<width && j+col[k]<heigth && !vis[i+row[k]][j+col[k]]) {
+                vis[i + row[k]][j + col[k]] = true;
+                if(compararColor(colorInicial,data[i + row[k]][j + col[k]])){
+                    if(mode=="pintar"){
+
+                        SetPixel(i + row[k],j + col[k],color.rgbtRed,color.rgbtGreen,color.rgbtBlue);
+                    }
+                    else {
+                        SetPixel(i + row[k],j + col[k],data[i + row[k]][j + col[k]].rgbtRed/2,data[i + row[k]][j + col[k]].rgbtGreen/2,data[i + row[k]][j + col[k]].rgbtBlue/2);
+                    }
+                    q.push(make_pair(i + row[k], j + col[k]));
+                }
+            }
+        }
+    }
+    grosor=temp;
+
+}
+
+void image::rectangle(float x1, float y1, float x2, float y2) {
+    RGBTRIPLE rojo ={(BYTE) 0,(BYTE) 0,(BYTE) 255};
+    linea(x1,y1,x2,y1);
+    linea(x2,y1,x2,y2);
+    linea(x2,y2,x1,y2);
+    linea(x1,y2,x1,y1);
+}
+
+void image::triangulo(float x1, float y1, float x2, float y2) {
+    int xMenor;
+        if(x1<x2){
+            xMenor=x1;
+        }else{
+            xMenor=x2;
+        }
+        int punta=abs(x1-x2)/2;
+        RGBTRIPLE rojo ={(BYTE) 0,(BYTE) 0,(BYTE) 255};
+        linea(x1,y2,x2,y2);
+        linea(x1,y2,punta+xMenor,y1);
+        linea(x2,y2,punta+xMenor,y1);
+}
+
+void image::DisminuirGrosor() {
+    if(grosor<=1){
+        grosor=1;
+    }
+    else{
+        grosor--;
+    }
+}
+
+void image::AumentarGrosor() {
+    grosor++;
+}
+
+void image::rombo(float x1, float y1, float x2, float y2) {
+    int puntomediox=abs((x1-x2)/2);
+    int puntomedioy=abs((y1-y2)/2);
+    linea(x1+puntomediox,y1,x2,puntomedioy+y1);
+    linea(x2,puntomedioy+y1,x1+puntomediox,y2);
+    linea(x1+puntomediox,y2,x1,y1+puntomedioy);
+    linea(x1,y1+puntomedioy,x1+puntomediox,y1);
+}
+
+void image::setColor(RGBTRIPLE _color){
+    color=_color;
+}
+
+
+
+bool image::compararColor(RGBTRIPLE colorInical, RGBTRIPLE colorcasilla) {
+    return colorInical.rgbtRed==colorcasilla.rgbtRed &&
+    colorInical.rgbtGreen==colorcasilla.rgbtGreen &&
+    colorInical.rgbtBlue==colorcasilla.rgbtBlue;
+}
+
+void image::SelectRectangle(float x1, float y1, float x2, float y2) {
+    int xmayor,xmenor,ymenor,ymayor;
+    if (x1>x2){
+        xmayor=x1;
+        xmenor=x2;
+    }
+    else{
+        xmayor=x2;
+        xmenor=x1;
+    }
+    if (y1>y2){
+        ymayor=y1;
+        ymenor=y2;
+    }
+    else{
+        ymayor=y2;
+        ymenor=y1;
+    }
+    int i=xmenor;
+    int j=ymenor;
+    while(i<xmayor){
+        SetPixel(i,j,data[i][j].rgbtRed/6,data[i][j].rgbtGreen/6,data[i][j].rgbtBlue/6);
+        j++;
+        if(j>ymayor){
+            j=ymenor;
+            i++;
+        }
+    }
+}
+void image::ChageMode() {
+    if(mode=="pintar"){
+        mode="seleccionar";
+    }
+    else {
+        mode="pintar";
+    }
+}
+void image::setmode(string _mode){
+    mode=_mode;
+}
 
 
 

@@ -19,10 +19,13 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        widget.ui
         image.hpp
         image.cpp
         bmp.h
-)
+        widget.h
+        widget.cpp
+    )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(proyecto2
