@@ -66,6 +66,11 @@ class PaintWidget : public QWidget {
     }
 
     // Override the mousePressEvent(QMouseEvent *) [...]
+    /**
+     * @brief mousePressEvent
+     * @param ev
+     * funcion para manejar los clicks del mouse
+     */
     void mousePressEvent(QMouseEvent * ev) override {
         esFigura=ventana.esFigura;
         figura=ventana.figura;
@@ -139,22 +144,26 @@ class PaintWidget : public QWidget {
 
         }        
     }
-
+    /**
+     * @brief keyPressEvent
+     * @param ev
+     * funcion para cuando se ejecute alguna tecla
+     */
     void keyPressEvent(QKeyEvent * ev) override {
         //"\n";
-        if(ev->key()==Qt::Key_S){
-            bitmap.rotate_rigth();
-            bitmap.write("/home/jose/proyecto2/copia.bmp");
+        if(ev->key()==Qt::Key_L){
             bitmap.rotate_left();
+            cargarimagen();
+            updateWidget();
+            guardar();
+            drawNoPos();
         }
         else if(ev->key()==Qt::Key_R){
-            bitmap.rotate_right;
-            bitmap.write("/home/jose/proyecto2/copia.bmp");
-            
-        }
-        else if(ev->key()==Qt::Key_L){
-            bitmap.rotate_left();
-            bitmap.write("/home/jose/proyecto2/copia.bmp");
+            bitmap.rotate_rigth();
+            cargarimagen();
+            updateWidget();
+            guardar();
+            drawNoPos();
         }
         else if(ev->key()==Qt::Key_Up){
             bitmap.AumentarGrosor();
@@ -165,12 +174,20 @@ class PaintWidget : public QWidget {
 
 
     }
-    // Override the mouseMoveEvent(QMouseEvent *) [...]
+    /**
+     * @brief mouseMoveEvent
+     * @param ev
+     * Override the mouseMoveEvent(QMouseEvent *) [...]
+     */
     void mouseMoveEvent(QMouseEvent * ev) override {
         if(!figura){
             draw(ev->pos());
         }
     }
+    /**
+     * @brief cargarimagen
+     * funcion para cargar los pixeles al bitmap
+     */
     void cargarimagen(){
         QPainter painter{&m_pixmap};        
         for(int i=0;i<bitmap.getWidth();i++){
@@ -180,6 +197,10 @@ class PaintWidget : public QWidget {
             }
         }
     }
+    /**
+     * @brief drawNoPos
+     * funcion para dibujar sin una posicion
+     */
     void drawNoPos(){
         filtro=ventana.filtro;
         esFiltro=ventana.esFiltro;
@@ -207,13 +228,22 @@ class PaintWidget : public QWidget {
         cargarimagen();
         update();
     }
+    /**
+     * @brief draw
+     * @param pos
+     * funcion para dibujar en el canvas
+     */
     void draw(const QPoint & pos) {
         bitmap.linea(m_lastPos.x(),m_lastPos.y(),pos.x(),pos.y());
         cargarimagen();
-        QString text;
+        
         m_lastPos = pos;
         update();
     }
+    /**
+     * @brief guardar
+     * FUnción para guardar la imagen bmp
+     */
     void guardar(){
         texto=ventana.texto;
         tipo=ventana.tipo;
@@ -251,25 +281,44 @@ class PaintWidget : public QWidget {
     }
 public:
     using QWidget::QWidget;
-
+    /**
+     * @brief setWidth
+     * funcion para poner el ancho 
+     */
     int setWidth(){
         width=QInputDialog::getInt(this,"Inicio","Digite el valor del ancho: ");
         return width;
     }
+    /**
+     * @brief setWidth
+     * funcion para poner el alto
+     */
     int setHeight(){
         height=QInputDialog::getInt(this,"Inicio","Digite el valor de la altura: ");
         return height;
     }
+    /**
+     * @brief setWidth
+     * funcion para inicializar el bitmap y los botones
+     */
     void init(){
         ventana.show();
         bitmap.generate(width,height);
         bitmap.white();
     }
+    /**
+     * @brief updateDrawing
+     * funcion para actualizar el dibujo
+     */
     void updateDrawing(){
         figura=false;
         cargarimagen();
         update();
     }
+    /**
+     * @brief updateWidget
+     * funcion para actualizar los colores del widget
+     */
     void updateWidget(){
         col=ventana.col;
         if(col=="blanco"){
